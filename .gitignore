@@ -1,0 +1,77 @@
+######################################
+# Unreal Engine GitIgnore Template
+######################################
+
+# Project-specific folders to ignore
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.VC.db
+*.VC.opendb
+
+# Plugins (generated content)
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# Compiled source
+*.dll
+*.exe
+*.so
+*.dylib
+*.app
+
+# Compiled objects
+*.o
+*.obj
+*.lo
+*.slo
+
+# Static libraries
+*.lib
+*.a
+*.la
+*.lai
+
+# Dynamic libraries
+*.dylib
+
+# Precompiled headers
+*.pch
+*.gch
+
+# IDE-specific files
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Xcode project files
+*.xcodeproj
+*.xcworkspace
+
+# Log files
+*.log
+
+# Auto-generated project files
+*.opensdf
+*.sdf
+
+# Precomputed map data
+*_BuiltData.uasset
+
+# VS Code files (optional)
+.vscode/
+
+######################################
+# 🔓 Whitelisted Items (Keep These)
+######################################
+
+!Config/
+!Content/
+!Source/
+!*.uproject
+!*.uplugin
