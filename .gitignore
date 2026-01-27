@@ -5,6 +5,7 @@
 # Project-specific folders to ignore
 Binaries/
 Build/
+Builds/
 DerivedDataCache/
 Intermediate/
 Saved/
