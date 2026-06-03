@@ -171,6 +171,7 @@ private:
 
 	static float      GetFloatProp(UObject* Obj, FName Name, float Default = 0.f);
 	static void       SetFloatProp(UObject* Obj, FName Name, float Value);
+	static void       SetBoolProp (UObject* Obj, FName Name, bool  Value);
 	static UActorComponent* FindDmgSys(AActor* Actor);
 	static AActor*    PickRandomPoint(const TArray<AActor*>& Points);
 };

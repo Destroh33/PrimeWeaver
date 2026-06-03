@@ -145,11 +145,14 @@ void AArenaManager::SpawnNextEnemy()
 	{
 		const FArenaRoundConfig& Config = RoundConfigs[CurrentRound];
 
+		SetBoolProp(Enemy, TEXT("inArena"), true);
+
+		Enemy->FinishSpawning(Transform);
+
+		// Apply after FinishSpawning so BeginPlay (which may reset health) runs first
 		if      (Class == BearClass)  ApplyStatsToEnemy(Enemy, Config, BearBase);
 		else if (Class == MothClass)  ApplyStatsToEnemy(Enemy, Config, MothBase);
 		else                          ApplyStatsToEnemy(Enemy, Config, SpidaBase);
-
-		Enemy->FinishSpawning(Transform);
 
 		BindToEnemyDeath(Enemy);
 		OnEnemySpawned(Enemy, CurrentRound + 1);
@@ -248,7 +251,8 @@ void AArenaManager::ApplyStatsToEnemy(AActor* Enemy, const FArenaRoundConfig& Co
 
 	if (UActorComponent* DmgSys = FindDmgSys(Enemy))
 	{
-		const float ScaledMaxHealth = Base.BaseMaxHealth * Config.HealthMultiplier;
+		const float CurrentMaxHealth = GetFloatProp(DmgSys, TEXT("maxHealth"));
+		const float ScaledMaxHealth  = CurrentMaxHealth * Config.HealthMultiplier;
 		SetFloatProp(DmgSys, TEXT("maxHealth"), ScaledMaxHealth);
 		SetFloatProp(DmgSys, TEXT("health"),    ScaledMaxHealth);
 	}
@@ -277,6 +281,13 @@ void AArenaManager::SetFloatProp(UObject* Obj, FName Name, float Value)
 		return;
 	}
 	if (FFloatProperty* P = FindFProperty<FFloatProperty>(Obj->GetClass(), Name))
+		P->SetPropertyValue_InContainer(Obj, Value);
+}
+
+void AArenaManager::SetBoolProp(UObject* Obj, FName Name, bool Value)
+{
+	if (!Obj) return;
+	if (FBoolProperty* P = FindFProperty<FBoolProperty>(Obj->GetClass(), Name))
 		P->SetPropertyValue_InContainer(Obj, Value);
 }
 
