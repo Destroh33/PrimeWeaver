@@ -30,9 +30,9 @@ void AArenaManager::BeginPlay()
 
 void AArenaManager::StartArena()
 {
-	CurrentRound  = 0;
+	CurrentRound = 0;
 	EnemiesKilled = 0;
-	TotalEnemies  = 0;
+	TotalEnemies = 0;
 	BeginPreRound();
 }
 
@@ -54,7 +54,7 @@ void AArenaManager::BeginPreRound()
 	}
 
 	PreRoundTimeRemaining = PreRoundDuration;
-	OnPreRoundBegin(CurrentRound + 1);
+	OnPreRoundStart(CurrentRound + 1);
 
 	GetWorldTimerManager().SetTimer(
 		PreRoundCountdownHandle,
@@ -83,28 +83,28 @@ void AArenaManager::BeginRound()
 	PendingSpawns.Empty();
 
 	auto Enqueue = [&](int32 Count, TSubclassOf<AActor> Class, const TArray<AActor*>& Points)
-	{
-		if (!Class || Points.Num() == 0 || Count <= 0) return;
-		for (int32 i = 0; i < Count; i++)
 		{
-			if (AActor* Point = PickRandomPoint(Points))
-				PendingSpawns.Add({ Class, Point->GetActorTransform() });
-		}
-	};
+			if (!Class || Points.Num() == 0 || Count <= 0) return;
+			for (int32 i = 0; i < Count; i++)
+			{
+				if (AActor* Point = PickRandomPoint(Points))
+					PendingSpawns.Add({ Class, Point->GetActorTransform() });
+			}
+		};
 
-	Enqueue(Config.BearCount,  BearClass,  BearSpawnPoints);
-	Enqueue(Config.MothCount,  MothClass,  MothSpawnPoints);
+	Enqueue(Config.BearCount, BearClass, BearSpawnPoints);
+	Enqueue(Config.MothCount, MothClass, MothSpawnPoints);
 	Enqueue(Config.SpidaCount, SpidaClass, SpidaSpawnPoints);
 
 	// Shuffle so the spawn order is unpredictable
 	for (int32 i = PendingSpawns.Num() - 1; i > 0; i--)
 		PendingSpawns.Swap(i, FMath::RandRange(0, i));
 
-	TotalEnemies  = PendingSpawns.Num();
+	TotalEnemies = PendingSpawns.Num();
 	EnemiesKilled = 0;
-	SpawnIndex    = 0;
+	SpawnIndex = 0;
 
-	OnRoundBegin(CurrentRound + 1);
+	OnRoundStart(CurrentRound + 1);
 
 	if (TotalEnemies == 0)
 	{
@@ -127,8 +127,8 @@ void AArenaManager::SpawnNextEnemy()
 	}
 
 	const TPair<TSubclassOf<AActor>, FTransform>& Entry = PendingSpawns[SpawnIndex++];
-	TSubclassOf<AActor>  Class     = Entry.Key;
-	const FTransform&    Transform = Entry.Value;
+	TSubclassOf<AActor>  Class = Entry.Key;
+	const FTransform& Transform = Entry.Value;
 
 	AActor* Enemy = GetWorld()->SpawnActorDeferred<AActor>(
 		Class, Transform,
@@ -150,7 +150,7 @@ void AArenaManager::SpawnNextEnemy()
 		Enemy->FinishSpawning(Transform);
 
 		// Apply after FinishSpawning so BeginPlay (which may reset health) runs first
-		if      (Class == BearClass)  ApplyStatsToEnemy(Enemy, Config, BearBase);
+		if (Class == BearClass)  ApplyStatsToEnemy(Enemy, Config, BearBase);
 		else if (Class == MothClass)  ApplyStatsToEnemy(Enemy, Config, MothBase);
 		else                          ApplyStatsToEnemy(Enemy, Config, SpidaBase);
 
@@ -224,24 +224,24 @@ void AArenaManager::BindToEnemyDeath(AActor* Enemy)
 void AArenaManager::CacheBaseStats()
 {
 	auto Cache = [&](TSubclassOf<AActor> Class, FEnemyBaseStats& Out, const TCHAR* Label)
-	{
-		if (!Class)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ArenaManager: %s class not set — base stats will be 0."), Label);
-			return;
-		}
+			if (!Class)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ArenaManager: %s class not set — base stats will be 0."), Label);
+				return;
+			}
 
-		AActor* CDO = Class->GetDefaultObject<AActor>();
-		Out.BaseDamage    = GetFloatProp(CDO, TEXT("DamageDealt"));
-		if (UActorComponent* DmgSys = FindDmgSys(CDO))
-			Out.BaseMaxHealth = GetFloatProp(DmgSys, TEXT("maxHealth"));
+			AActor* CDO = Class->GetDefaultObject<AActor>();
+			Out.BaseDamage = GetFloatProp(CDO, TEXT("DamageDealt"));
+			if (UActorComponent* DmgSys = FindDmgSys(CDO))
+				Out.BaseMaxHealth = GetFloatProp(DmgSys, TEXT("maxHealth"));
 
-		UE_LOG(LogTemp, Log, TEXT("ArenaManager: %s base stats — Damage=%.1f  MaxHealth=%.1f"),
-			Label, Out.BaseDamage, Out.BaseMaxHealth);
-	};
+			UE_LOG(LogTemp, Log, TEXT("ArenaManager: %s base stats — Damage=%.1f  MaxHealth=%.1f"),
+				Label, Out.BaseDamage, Out.BaseMaxHealth);
+		};
 
-	Cache(BearClass,  BearBase,  TEXT("Bear"));
-	Cache(MothClass,  MothBase,  TEXT("Moth"));
+	Cache(BearClass, BearBase, TEXT("Bear"));
+	Cache(MothClass, MothBase, TEXT("Moth"));
 	Cache(SpidaClass, SpidaBase, TEXT("Spida"));
 }
 
@@ -252,9 +252,9 @@ void AArenaManager::ApplyStatsToEnemy(AActor* Enemy, const FArenaRoundConfig& Co
 	if (UActorComponent* DmgSys = FindDmgSys(Enemy))
 	{
 		const float CurrentMaxHealth = GetFloatProp(DmgSys, TEXT("maxHealth"));
-		const float ScaledMaxHealth  = CurrentMaxHealth * Config.HealthMultiplier;
+		const float ScaledMaxHealth = CurrentMaxHealth * Config.HealthMultiplier;
 		SetFloatProp(DmgSys, TEXT("maxHealth"), ScaledMaxHealth);
-		SetFloatProp(DmgSys, TEXT("health"),    ScaledMaxHealth);
+		SetFloatProp(DmgSys, TEXT("health"), ScaledMaxHealth);
 	}
 }
 
